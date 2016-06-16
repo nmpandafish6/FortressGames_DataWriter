@@ -10,12 +10,20 @@ import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
+import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -39,7 +47,8 @@ public class DataViewer {
         JPanel masterPanel = new JPanel(new BorderLayout());
         JPanel inputPanel = new JPanel();
         JLabel inputPanelText = new JLabel("Input Value");
-        JTextArea inputText = new JTextArea(10, 10);
+        final JTextArea inputText = new JTextArea(10, 10);
+        JButton openFile = new JButton("Open File");
         String[] dataTypes = new String[]{"byte","short","int","long","float","double","boolean"};
         final JComboBox dataTypeBox = new JComboBox(dataTypes);
         JPanel outputPanel = new JPanel();
@@ -48,6 +57,32 @@ public class DataViewer {
         final LabeledDataField decOutput = new LabeledDataField("decOutput");
         final LabeledDataField binOutput = new LabeledDataField("binOutput");
         
+        openFile.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JFileChooser fc = new JFileChooser();
+                fc.showOpenDialog(null);
+                if(fc.accept(null)){
+                    File file = fc.getSelectedFile();
+                    try {
+                        FileInputStream in = new FileInputStream(file);
+                        String text = "";
+                        while(in.available() > 0){
+                            int b = in.read();
+                            text += b + "\n";
+                        }
+                        inputText.setText(text);
+                    } catch (FileNotFoundException ex) {
+                        Logger.getLogger(DataViewer.class.getName()).log(Level.SEVERE, null, ex);
+                    } catch (IOException ex) {
+                        Logger.getLogger(DataViewer.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    
+                }
+                
+            }
+        });
         inputText.getDocument().addDocumentListener(new DocumentListener() {
             
             @Override
@@ -174,10 +209,11 @@ public class DataViewer {
         masterPanel.add(inputPanel, BorderLayout.WEST);
         masterPanel.add(outputPanel, BorderLayout.EAST);
         
-        inputPanel.setPreferredSize(new Dimension(200, 200));
+        inputPanel.setPreferredSize(new Dimension(200, 235));
         inputPanel.add(inputPanelText);
         inputPanel.add(dataTypeBox);
         inputPanel.add(inputText);
+        inputPanel.add(openFile);
         inputPanel.setBorder(BorderFactory.createLineBorder(Color.black));
         
         outputPanel.add(asciiOutput);
